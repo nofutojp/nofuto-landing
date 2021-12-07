@@ -1,0 +1,43 @@
+version: 2.1
+orbs:
+  node: circleci/node@3.0.1
+  aws-s3: circleci/aws-s3@1.0.16
+jobs:
+  setup:
+    executor:
+      name: node/default
+      tag: '14.17.0'
+    working_directory: ~/nofuto-landing
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: ~/nofuto-landing
+          paths:
+            - .
+  deploy:
+    docker:
+      - image: 'cimg/python:2.7'
+    working_directory: ~/nofuto-landing
+    steps:
+      - attach_workspace:
+          at: ~/nofuto-landing
+      - run: echo s3://nofuto-landing
+      - aws-s3/sync:
+          arguments: |
+            --acl public-read \
+            --cache-control "max-age=86400"
+          from: ~/nofuto-landing
+          overwrite: true
+          to: s3://nofuto-landing
+workflows:
+  deploy-to-s3:
+    jobs:
+      - setup:
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - setup
+          context: aws
