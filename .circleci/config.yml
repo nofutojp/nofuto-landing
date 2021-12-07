@@ -21,14 +21,14 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/nofuto-landing
-      - run: echo s3://nofuto-landing
+      - run: echo s3://nofutojp-landing
       - aws-s3/sync:
           arguments: |
             --acl public-read \
             --cache-control "max-age=86400"
           from: ~/nofuto-landing
           overwrite: true
-          to: s3://nofuto-landing
+          to: s3://nofutojp-landing
 workflows:
   deploy-to-s3:
     jobs:
